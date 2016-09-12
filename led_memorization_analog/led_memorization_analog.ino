@@ -65,6 +65,8 @@ void loop() {
   }
   
   else {
+    // Game has started
+    
     if (!generated) {
       // Generates a random LED sequence based on the player's
       // level and lights up the LEDs
@@ -83,6 +85,8 @@ void loop() {
     }
     
     else {
+      // A sequence has been generated
+      
       if (buttonPressCount < level + 1) {
         // Record the user's button presses
         
@@ -131,7 +135,8 @@ void loop() {
       else {
         // After an amount of presses equal to the current level
         // plus one has been recorded, the game determines
-        // whether the player is right or wrong       
+        // whether the player is right or wrong     
+        
         if (playerIsCorrect()) {
           // Every LED blinks in succession with a 50 ms delay 
           // in between for a total of 5 times
