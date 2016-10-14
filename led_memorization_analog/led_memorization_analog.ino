@@ -3,14 +3,14 @@ LED Memorization Game
 
 The game generates a random sequence of an amount of LED blinks
 and the player must be able to press the buttons associated with
-each LED in the right order. The game goes from levels 0 to 9 and
-the number of LEDs in the sequence is equal to the current level
-plus one. The amount of games one must play in order to level up is
-also equal to the current level plus one.
+each LED in the right order. The game goes from levels 1 to 10 and
+the number of LEDs in the sequence is equal to the current level. 
+The amount of games the player must play in order to level up is
+also equal to the current level.
 
 This version of the game uses voltage dividers with resistors of
 different values and an analog input pin to send multiple input
-value through one pin.
+values through one pin.
 
 In the code, "Game" refers to the whole game itself, while "Current
 Game" refers to the current random sequence being played.
@@ -28,6 +28,7 @@ const int resetButtonPin = 2;
 int resetButtonValue = 0;
 
 // Pin location of the LEDs
+// *****The pins must be next to each other*****
 const int led1Pin = 5;
 const int led2Pin = 6;
 const int led3Pin = 7;
@@ -42,11 +43,12 @@ bool generated = false;
 int buttonPressCount = 0;
 
 // Switch state check for analog input buttons
-int currentSwitchState = 0;
-int previousSwitchState = 0;
+int currentButtonState = 0;
+int previousButtonState = 0;
 
 void setup() {
   // put your setup code here, to run once 
+  
   // Reset button resets your button sequence
   pinMode(resetButtonPin, INPUT); 
   
@@ -59,11 +61,11 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   analogInputValue = analogRead(analogInputPin);
-  resetButtonValue = digitalRead(2);
+  resetButtonValue = digitalRead(resetButtonPin);
   
-  // Switch state check
-  if (analogInputValue > 0) { currentSwitchState = 1; }
-  else { currentSwitchState = 0; }
+  // Button state check
+  if (analogInputValue > 0) { currentButtonState = 1; }
+  else { currentButtonState = 0; }
   
   if (!started) {
     // Starts the game by pressing the reset button
@@ -84,13 +86,13 @@ void loop() {
       // A sequence has been generated
       if (buttonPressCount < level) {
         // Record the user's button presses
-        if (currentSwitchState != previousSwitchState) { 
+        if (currentButtonState != previousButtonState) { 
           // Only sends a signal when the program detects a
           // change in state, which prevents from sending
-          // multiple signals when the button is held down
+          // multiple signals when a button is held down
           processPlayerInput();
         }
-        previousSwitchState = currentSwitchState;
+        previousButtonState = currentButtonState;
           
         if (resetButtonValue == HIGH) {
           // If a mistake was made, reset button erases the user's
@@ -102,15 +104,15 @@ void loop() {
       
       else {
         // After an amount of presses equal to the current level
-        // plus one has been recorded, the game determines
-        // whether the player is right or wrong     
+        // has been recorded, the game determines whether the 
+        // player is right or wrong     
         if (playerIsCorrect()) {
           // Notify if the player is correct
           notifyPlayerCorrect();
           
           if (gamesInCurrentLevel == level) {
             // Level up when the player has played a number of
-            // games equal to the current level.
+            // games equal to the current level
             levelUp();
             
             if (level > 10) {
@@ -160,7 +162,7 @@ void generateSequence() {
   for (int a = 0; a < level; a++) {
   // The randomly generated numbers correspond to the
   // pins to which the LEDs are connected
-    sequence[a] = int(random(5, 8));
+    sequence[a] = int(random(led1Pin, led3Pin+1));
   }
   generated = true;
       
@@ -213,17 +215,6 @@ void notifyPlayerWrong() {
   allLedBlink(500);
 }
 
-void quickSuccessionBlink(int cycles) {
-// Every LED blinks in succession with a 50 ms delay 
-// in between for a total amount times specified in the 
-// parameter cycles
-  for (int f = 0; f < cycles; f++) {
-    for (int g = 5; g < 8; g++) {
-      ledBlink(g, 50);
-    }
-  }
-}
-
 bool playerIsCorrect() {
   // Determines whether the player is correct by comparing the
   // arrays sequence and buttonPresses
@@ -239,27 +230,35 @@ void processPlayerInput() {
   // Adds an LED to buttonSequence and lights up that LED 
   // based on the value of the analog input
   if (analogInputValue <= 1023 && analogInputValue >= 1020) {
-    // First button is associated with LED connected to 
-    // digital pin 5
+    // First button 
     ledBlink(led1Pin, 120);
     buttonPresses[buttonPressCount] = led1Pin;
     buttonPressCount += 1;
   }
           
   else if (analogInputValue >= 990 && analogInputValue <= 1005) {
-    // Second button is associated with LED connected to
-    // digital pin 6
+    // Second button
     ledBlink(led2Pin, 120);
     buttonPresses[buttonPressCount] = led2Pin;
     buttonPressCount += 1;
   }
           
   else if (analogInputValue >= 500 && analogInputValue <= 520) {
-    // Third button is associated with LED connected to
-    // digital pin 7
+    // Third button
     ledBlink(led3Pin, 120);
     buttonPresses[buttonPressCount] = led3Pin;
     buttonPressCount += 1;
+  }
+}
+
+void quickSuccessionBlink(int cycles) {
+// Every LED blinks in succession with a 50 ms delay 
+// in between for a total amount times specified in the 
+// parameter cycles
+  for (int f = 0; f < cycles; f++) {
+    ledBlink(led1Pin, 50);
+    ledBlink(led2Pin, 50);
+    ledBlink(led3Pin, 50);
   }
 }
 
