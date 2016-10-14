@@ -11,41 +11,49 @@ also equal to the current level plus one.
 This version of the game uses voltage dividers with resistors of
 different values and an analog input pin to send multiple input
 value through one pin.
+
+In the code, "Game" refers to the whole game itself, while "Current
+Game" refers to the current random sequence being played.
 */
 
 // Stores the randonmly generated sequence and the player's
 // button presses
-int sequence[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int buttonPresses[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int sequence[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-// Pin location and value of the game buttons
-int analogInputPin = A0;
+// Pin location and value of the game and reset buttons
+const int analogInputPin = A0;
 int analogInputValue = 0;
-
-// Pin location and value of the reset button
-int resetButtonPin = 2;
+const int resetButtonPin = 2;
 int resetButtonValue = 0;
 
-// Game values
-int buttonPressCount = 0;
-int level = 0;
-int gamesInCurrentLevel = 0;
+// Pin location of the LEDs
+const int led1Pin = 5;
+const int led2Pin = 6;
+const int led3Pin = 7;
+
+// Game variables
 bool started = false;
+int gamesInCurrentLevel = 0;
+int level = 1;
+
+// Current game variables
 bool generated = false;
+int buttonPressCount = 0;
 
 // Switch state check for analog input buttons
-int previousSwitchState = 0;
 int currentSwitchState = 0;
+int previousSwitchState = 0;
 
 void setup() {
   // put your setup code here, to run once 
   // Reset button resets your button sequence
-  pinMode(2, INPUT); 
+  pinMode(resetButtonPin, INPUT); 
   
   // LEDs
-  for (int ledPin = 5; ledPin < 8; ledPin++) {
-    pinMode(ledPin, OUTPUT);
-  }
+  pinMode(led1Pin, OUTPUT);
+  pinMode(led2Pin, OUTPUT);
+  pinMode(led3Pin, OUTPUT);
 }
 
 void loop() {
@@ -66,61 +74,21 @@ void loop() {
   
   else {
     // Game has started
-    
     if (!generated) {
       // Generates a random LED sequence based on the player's
       // level and lights up the LEDs
-      delay(500);
-      
-      for (int a = 0; a <= level; a++) {
-        // The randomly generated numbers correspond to the
-        // pins to which the LEDs are connected
-        sequence[a] = int(random(5, 8));
-      }
-      generated = true;
-      
-      for (int b = 0; b <= level; b++) {
-        ledBlink(sequence[b], 250);
-      }
+      generateSequence();
     }
     
     else {
       // A sequence has been generated
-      
-      if (buttonPressCount < level + 1) {
+      if (buttonPressCount < level) {
         // Record the user's button presses
-        
         if (currentSwitchState != previousSwitchState) { 
           // Only sends a signal when the program detects a
           // change in state, which prevents from sending
           // multiple signals when the button is held down
-          
-          if (analogInputValue <= 1023 &&
-            analogInputValue >= 1020) {
-            // First button is associated with LED connected to 
-            // digital pin 5
-            ledBlink(5, 120);
-            buttonPresses[buttonPressCount] = 5;
-            buttonPressCount += 1;
-          }
-          
-          else if (analogInputValue >= 990 && 
-            analogInputValue <= 1005) {
-            // Second button is associated with LED connected to
-            // digital pin 6
-            ledBlink(6, 120);
-            buttonPresses[buttonPressCount] = 6;
-            buttonPressCount += 1;
-          }
-          
-          else if (analogInputValue >= 500 &&
-            analogInputValue <= 520) {
-            // Third button is associated with LED connected to
-            // digital pin 7
-            ledBlink(7, 120);
-            buttonPresses[buttonPressCount] = 7;
-            buttonPressCount += 1;
-          }
+          processPlayerInput();
         }
         previousSwitchState = currentSwitchState;
           
@@ -136,63 +104,37 @@ void loop() {
         // After an amount of presses equal to the current level
         // plus one has been recorded, the game determines
         // whether the player is right or wrong     
-        
         if (playerIsCorrect()) {
-          // Every LED blinks in succession with a 50 ms delay 
-          // in between for a total of 5 times
-          quickSuccessionBlink(5);
-          gamesInCurrentLevel += 1;
+          // Notify if the player is correct
+          notifyPlayerCorrect();
           
-          if (gamesInCurrentLevel == level + 1) {
-            // The number of games in the current level is equal 
-            // to current level plus one. Level up once that
-            // number of games is reached and reset the variable
-            // gamesInCurrentLevel
-            level += 1;
-            gamesInCurrentLevel = 0;
+          if (gamesInCurrentLevel == level) {
+            // Level up when the player has played a number of
+            // games equal to the current level.
+            levelUp();
             
-            if (level > 9) {
-              // When the player finishes the game, light up
-              // the LEDs as they would after getting a sequence
-              // right, but for a longer amount of time
-              delay(50);
-              quickSuccessionBlink(10);
-              level = 0;
-              gamesInCurrentLevel = 0;
-              started = false;
+            if (level > 10) {
+              // Notify if the player wins and reset the game
+              notifyPlayerWon();
+              resetGame();
             }
             
             else {
-              // All LEDs lighting up twice with a 150 ms delay
-              // in between signifies leveling up
-              delay(100);
-              for (int c = 0; c < 2; c++) {
-                allLedBlink(150);
-              }
+              // Notify if the player levels up
+              notifyPlayerLevelUp();
             }
           }
           delay(1000);
         }
-        
+
         else {
-          // If the player is incorrect, light up all LEDs for 
-          // half a second, reset the number of games and levels,
-          // then stop the game.
-          allLedBlink(500);
-          level = 0;
-          gamesInCurrentLevel = 0;
-          started = false;
+          // Notify if the player is wrong and reset the game 
+          notifyPlayerWrong();
+          resetGame();
         }
-        // Resets the values of most of the global variables to
-        // the original value
-        analogInputValue = 0;
-        buttonPressCount = 0;
-        generated = false;
-        
-        // Resets sequence and buttonPresses to their original
-        // state
-        resetArray(sequence);
-        resetArray(buttonPresses);
+        // Reset the variables after the "Current Game" has
+        // been played 
+        resetCurrentGameVariables();
       }
     }
   }
@@ -200,14 +142,31 @@ void loop() {
 
 void allLedBlink(int ms) {
   // All LEDs blink for the specified amount of time
-  digitalWrite(5, HIGH);
-  digitalWrite(6, HIGH);
-  digitalWrite(7, HIGH);
+  digitalWrite(led1Pin, HIGH);
+  digitalWrite(led2Pin, HIGH);
+  digitalWrite(led3Pin, HIGH);
   delay(ms);
-  digitalWrite(5, LOW);
-  digitalWrite(6, LOW);
-  digitalWrite(7, LOW);
+  digitalWrite(led1Pin, LOW);
+  digitalWrite(led2Pin, LOW);
+  digitalWrite(led3Pin, LOW);
   delay(ms);
+}
+
+void generateSequence() {
+  // Generates a random sequence of LEDs based on the player's
+  // level and lights up the LEDs
+  delay(500);
+      
+  for (int a = 0; a < level; a++) {
+  // The randomly generated numbers correspond to the
+  // pins to which the LEDs are connected
+    sequence[a] = int(random(5, 8));
+  }
+  generated = true;
+      
+  for (int b = 0; b < level; b++) {
+    ledBlink(sequence[b], 250);
+  }
 }
 
 void ledBlink(int led, int ms) {
@@ -216,6 +175,42 @@ void ledBlink(int led, int ms) {
   delay(ms);
   digitalWrite(led, LOW);
   delay(ms);
+}
+
+void levelUp() {
+  // Levels up
+  level += 1;
+  gamesInCurrentLevel = 0;
+}
+
+void notifyPlayerCorrect() {
+  // Every LED blinks in succession with a 50 ms delay 
+  // in between for a total of 5 times
+  quickSuccessionBlink(5);
+  gamesInCurrentLevel += 1;
+}
+
+void notifyPlayerLevelUp() {
+  // All LEDs lighting up twice with a 150 ms delay
+  // in between signifies leveling up
+  delay(100);
+  for (int c = 0; c < 2; c++) {
+    allLedBlink(150);
+  }
+}
+
+void notifyPlayerWon() {
+  // When the player finishes the game, light up
+  // the LEDs as they would after getting a sequence
+  // right, but for a longer amount of time
+  delay(50);
+  quickSuccessionBlink(10);
+}
+
+void notifyPlayerWrong() {
+  // If the player is incorrect, light up all LEDs for 
+  // half a second.
+  allLedBlink(500);
 }
 
 void quickSuccessionBlink(int cycles) {
@@ -240,11 +235,56 @@ bool playerIsCorrect() {
   return true;
 }
 
+void processPlayerInput() {
+  // Adds an LED to buttonSequence and lights up that LED 
+  // based on the value of the analog input
+  if (analogInputValue <= 1023 && analogInputValue >= 1020) {
+    // First button is associated with LED connected to 
+    // digital pin 5
+    ledBlink(led1Pin, 120);
+    buttonPresses[buttonPressCount] = led1Pin;
+    buttonPressCount += 1;
+  }
+          
+  else if (analogInputValue >= 990 && analogInputValue <= 1005) {
+    // Second button is associated with LED connected to
+    // digital pin 6
+    ledBlink(led2Pin, 120);
+    buttonPresses[buttonPressCount] = led2Pin;
+    buttonPressCount += 1;
+  }
+          
+  else if (analogInputValue >= 500 && analogInputValue <= 520) {
+    // Third button is associated with LED connected to
+    // digital pin 7
+    ledBlink(led3Pin, 120);
+    buttonPresses[buttonPressCount] = led3Pin;
+    buttonPressCount += 1;
+  }
+}
+
 void resetArray(int array[]) {
   // Resets the values of the arrays sequence and buttonPresses
   for (int e = 0; e < 10; e++) {
     array[e] = 0;
   }
+}
+
+void resetGame() {
+  // Resets the whole game
+  level = 1;
+  gamesInCurrentLevel = 0;
+  started = false;
+}
+
+void resetCurrentGameVariables() {
+  // Resets the variables that store information about the 
+  // current game
+  analogInputValue = 0;
+  buttonPressCount = 0;
+  generated = false;
+  resetArray(buttonPresses);
+  resetArray(sequence);
 }
 
 
