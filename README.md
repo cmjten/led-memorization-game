@@ -25,4 +25,4 @@ analog pin in order to send signals of different values through one pin.
 
 <img src=https://github.com/cmjten/led-memorization-game-analog/blob/master/led_memorization_analog_setup.png width=600/>
 
-<img src=https://github.com/cmjten/led-memorization-game-analog/blob/master/led_memorization_analog_breadboard.png width=600/>
+<img src=https://raw.githubusercontent.com/cmjten/led-memorization-game-analog/master/led_memorization_analog_breadboard.png width=600/>
