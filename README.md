@@ -1,10 +1,9 @@
 # LED Memorization Game with Analog Inputs
 
-A random sequence of LED blinks equal to the current level (0-9) plus one is generated and the player
-must be able to press the buttons associated with each LED in the sequence in the right order. In order
-to level up, the player must play a number of games in the current level equal to the current level (0-9)
-plus one. If the player makes a mistake, the game ends. There is a reset button which erases the player's
-inputs so far.
+A random sequence of LED blinks equal to the current level (1-10) is generated and the player must be able to 
+press the buttons associated with each LED in the sequence in the right order. In order to level up, the player 
+must play a number of games equal to the current level (1-10). If the player makes a mistake, the game ends. 
+There is a reset button which erases the player's inputs so far.
 
 This version of the game uses voltage dividers with resistors of different values connected to a single
 analog pin in order to send signals of different values through one pin. 
