@@ -24,7 +24,7 @@ changed accordingly.
 ### Notes
 - Any IR Receiver and IR Remote may be used, so long as they both operate at the same frequency. 
 - The hexadecimal values for the buttons must be changed according to your IR Remote's mapping. The Arduino-IRremote
-library contains an Arduino sketch for decoding the values of each button.
+library contains an Arduino sketch for decoding the value of each button.
 
 ### Images
 
