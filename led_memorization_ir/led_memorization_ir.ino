@@ -18,7 +18,7 @@ In the code, "Game" refers to the whole game itself, while "Current
 Game" refers to the current random sequence being played.
 
 Third-Party Libraries:
-- Arduino-IRremote by Ken Shirriff
+- Arduino-IRremote: https://github.com/z3t0/Arduino-IRremote
 */
 
 // IR Receiver variables
