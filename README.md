@@ -18,3 +18,7 @@ changed accordingly.
 
 ### Required Third-Party Libraries
 - [Arduino-IRremote](https://github.com/z3t0/Arduino-IRremote)
+
+### Images
+
+<img src=https://github.com/cmjten/led-memorization-game-ir/blob/master/led_memorization_game_ir_setup.png width=600/>
