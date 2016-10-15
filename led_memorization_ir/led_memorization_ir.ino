@@ -240,28 +240,28 @@ void processPlayerInput() {
   // Adds an LED to buttonSequence and lights up that LED 
   // based on the value of the analog input
   switch (buttonPressed) {
-    case 0xFF30CF:
+    case led1Button:
       // LED 1 Button
       ledBlink(led1Pin, 120);
       buttonPresses[buttonPressCount] = led1Pin;
       buttonPressCount += 1;
       break;
   
-    case 0xFF18E7:
+    case led2Button:
       // LED 2 Button
       ledBlink(led2Pin, 120);
       buttonPresses[buttonPressCount] = led2Pin;
       buttonPressCount += 1;
       break;
   
-    case 0xFF7A85:
+    case led3Button:
       // LED 3 Button
       ledBlink(led3Pin, 120);
       buttonPresses[buttonPressCount] = led3Pin;
       buttonPressCount += 1;
       break;
     
-    case 0xFF6897:
+    case resetButton:
       // If a mistake was made, reset button erases the user's
       // inputs so far
       resetArray(buttonPresses);
@@ -299,7 +299,7 @@ void resetCurrentGameVariables() {
   // Resets the variables that store information about the 
   // current game
   buttonPressCount = 0;
-  buttonPressed = 0xFFFFFF;
+  buttonPressed = 0;
   generated = false;
   resetArray(buttonPresses);
   resetArray(sequence);
