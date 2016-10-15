@@ -3,7 +3,8 @@
 A random sequence of LED blinks equal to the current level (1-10) is generated and the player must be able to 
 press the buttons associated with each LED in the sequence in the right order. In order to level up, the player 
 must play a number of games equal to the current level (1-10). If the player makes a mistake, the game ends. 
-There is a reset button which erases the player's inputs so far.
+There is a start/reset button which starts a game if the game hasn't started, or the player's inputs so far
+if the game has started.
 
 This version of the game uses voltage dividers with resistors of different values connected to a single
 analog pin in order to send signals of different values through one pin. 
