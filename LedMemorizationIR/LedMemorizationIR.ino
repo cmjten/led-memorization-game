@@ -1,4 +1,4 @@
-/*
+/* 
  * LED Memorization Game
  *
  * The goal of the game is to to repeat the randomly
@@ -8,16 +8,19 @@
  * the player wins.
  *
  * Controls:
- * - Three push buttons for the three LEDs
- * - One isolated push button for start/reset
+ * - Three IR buttons for the three LEDs
+ * - One IR button for start/reset
  *    - Starts game if game hasn't started
  *    - Resets player's inputs for current sequence if game
  *      has started
+ *      
+ * Hex mappings are defined in the GameData.hpp file.
  */
-#include "GameData.hpp"
-// Pins and maximum level are defined in GameData.hpp file
 
-// Game variables
+#include <IRremote.h>
+#include "GameData.hpp"
+
+IRrecv ir(IR_PIN);
 byte sequence[MAX_LEVEL] = {0};
 byte pressCount;
 byte games;
@@ -28,19 +31,25 @@ byte currentState = 0;
 byte previousState = 0;
 
 void setup() {
-  pinMode(INPUT_PIN, INPUT);
-  pinMode(RESET_PIN, INPUT);
   pinMode(LED_1, OUTPUT);
   pinMode(LED_2, OUTPUT);
   pinMode(LED_3, OUTPUT);
+  ir.enableIRIn();
 }
 
 void loop() {
-  unsigned short analogVal = analogRead(INPUT_PIN);
-  byte resetVal = digitalRead(RESET_PIN);
+  // Gets the player's input
+  decode_results results;
+  unsigned long buttonVal;
+  if (ir.decode(&results)) {
+    buttonVal = results.value;
+    ir.resume();
+  }
+  else buttonVal = 0;
+  delay(100);
 
   // High when a button is pressed
-  if (analogVal > 0) currentState = 1; // > 5 for noise
+  if (buttonVal != 0) currentState = 1;
   else currentState = 0;
 
   // Checks for rising edge in input signal (low to high)
@@ -53,11 +62,11 @@ void loop() {
       // start
       level = 1;
       games = 0;
-      if (resetVal == HIGH) gameState = 1; // Start
+      if (buttonVal == RESET) gameState = 1; // Start
       break;
 
     case 1:
-      // Sets/eesets sequence values and generates a new 
+      // Sets/resets sequence values and generates a new 
       // sequence
       generateSequence();
       pressCount = 0;
@@ -66,14 +75,15 @@ void loop() {
       break;
 
     case 2:
-      if (pressCount < level && risingEdge)
-        getInput(analogVal);
-        // Processes input when there's a rising edge
-      else if (pressCount < level && resetVal == HIGH) {
+      if (pressCount < level && buttonVal == RESET) {
         // Resets player's inputs
         mistakeFound = false;
         pressCount = 0;
       }
+      else if (pressCount < level && risingEdge)
+        getInput(buttonVal);
+        // Processes input when there's a rising edge
+     
       else if (!mistakeFound && pressCount == level) {
         // Right sequence
         playerCorrect();
