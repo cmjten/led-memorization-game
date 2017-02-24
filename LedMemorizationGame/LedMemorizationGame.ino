@@ -1,34 +1,29 @@
 /*
  * LED Memorization Game
  *
- * The goal of the game is to be able to repeat the randomly
- * generates sequence of LEDs. A player must play games
- * equal to the current level in order to level up. The
- * player wins once the player finishes the level specified 
- * by MAX_LEVEL.
+ * The goal of the game is to to repeat the randomly
+ * generated sequence of LEDs. A player must play sequences
+ * equal to the current level in order to level up, and once
+ * all the sequences in the maximum level have been played, 
+ * the player wins.
  *
  * Controls:
  * - Three push buttons for the three LEDs
  * - One isolated push button for start/reset
- *    - Start games if game hasn't started
+ *    - Starts game if game hasn't started
  *    - Resets player's inputs for current sequence if game
  *      has started
- *
- * Game states:
- * 0 - Game hasn't started
- * 1 - Generate a new sequence
- * 2 - Play
  */
 #include "GameData.hpp"
 // Pins and maximum level are defined in GameData.hpp file
 
 // Game variables
 byte sequence[MAX_LEVEL] = {0};
-byte pressCount = 0;
+byte pressCount;
 byte games;
 byte level;
-byte gameState = 0;
-boolean mistakeFound = false;
+byte gameState;
+boolean mistakeFound;
 byte currentState = 0;
 byte previousState = 0;
 
@@ -54,14 +49,16 @@ void loop() {
 
   switch (gameState) {
     case 0:
-      // Resets game values and waits for player to start
+      // Sets/resets game values and waits for player to 
+      // start
       level = 1;
       games = 0;
       if (resetVal == HIGH) gameState = 1; // Start
       break;
 
     case 1:
-      // Resets sequence values and generates a new sequence
+      // Sets/eesets sequence values and generates a new 
+      // sequence
       generateSequence();
       pressCount = 0;
       mistakeFound = false;
@@ -69,17 +66,16 @@ void loop() {
       break;
 
     case 2:
-      // Player hasn't finished inputting a full sequence
       if (pressCount < level && risingEdge)
         getInput(analogVal);
-      // Processes input when there's a rising edge
+        // Processes input when there's a rising edge
       else if (pressCount < level && resetVal == HIGH) {
         // Resets player's inputs
         mistakeFound = false;
         pressCount = 0;
       }
-      // Player has finished inputting a full sequence
       else if (!mistakeFound && pressCount == level) {
+        // Right sequence
         playerCorrect();
         gameState = 1; // Next sequence
 

@@ -5,6 +5,8 @@
 #define LEDGAME
 
 #include <Arduino.h>
+
+// Hardware constants
 #define IR_PIN 2
 // LED pins must be next to each other
 #define LED_1 5
@@ -15,9 +17,9 @@
 #define LED_2_BUTTON 0xFF18E7
 #define LED_3_BUTTON 0xFF7A85
 #define RESET 0xFF6897
-#define MAX_LEVEL 3
 
-// Game variables
+// Game variables and constants
+#define MAX_LEVEL 10
 extern byte sequence[MAX_LEVEL];
 extern byte pressCount;
 extern byte games;
