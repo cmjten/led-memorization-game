@@ -1,3 +1,27 @@
+/* 
+ * LED Memorization Game
+ *
+ * The goal of the game is to be able to repeat the randomly
+ * generates sequence of LEDs. A player must play games
+ * equal to the current level in order to level up. The
+ * player wins once the player finishes the level specified 
+ * by MAX_LEVEL.
+ *
+ * Controls:
+ * - Three IR buttons for the three LEDs
+ * - One IR button for start/reset
+ *    - Start games if game hasn't started
+ *    - Resets player's inputs for current sequence if game
+ *      has started
+ *      
+ * Hex mappings are defined in the GameData.hpp file.
+ *
+ * Game states:
+ * 0 - Game hasn't started
+ * 1 - Generate a new sequence
+ * 2 - Play
+ */
+
 #include <IRremote.h>
 #include "GameData.hpp"
 
@@ -19,6 +43,7 @@ void setup() {
 }
 
 void loop() {
+  // Processes the player's input
   decode_results results;
   unsigned long buttonVal;
   if (ir.decode(&results)) {
@@ -32,7 +57,7 @@ void loop() {
   if (buttonVal != 0) currentState = 1;
   else currentState = 0;
 
-    // Checks for rising edge in input signal (low to high)
+  // Checks for rising edge in input signal (low to high)
   boolean risingEdge = (currentState != previousState &&
     currentState == 1);
 
