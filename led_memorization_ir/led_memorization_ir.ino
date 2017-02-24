@@ -39,10 +39,10 @@ const int led3Pin = 7;
 
 // Button mappings on the remote. 
 // *****Change this to match your IR Remote's button mappings*****
-const int led1Button = 0xFF30CF;
-const int led2Button = 0xFF18E7;
-const int led3Button = 0xFF7A85;
-const int resetButton = 0xFF6897;
+const long led1Button = 0xFF30CF;
+const long led2Button = 0xFF18E7;
+const long led3Button = 0xFF7A85;
+const long resetButton = 0xFF6897;
 
 // Game variables
 bool started = false;
@@ -52,7 +52,7 @@ int level = 1;
 // Current game variables
 bool generated = false;
 int buttonPressCount = 0;
-int buttonPressed = 0;
+long buttonPressed = 0;
 
 // Switch state check
 int currentRemoteState = 0;
