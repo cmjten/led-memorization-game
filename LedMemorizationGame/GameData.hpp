@@ -18,7 +18,6 @@ extern byte sequence[MAX_LEVEL];
 extern byte pressCount;
 extern byte games;
 extern byte level;
-extern byte gameState;
 extern boolean mistakeFound;
 
 // Game functions
