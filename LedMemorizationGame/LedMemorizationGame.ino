@@ -14,10 +14,13 @@
  *    - Resets player's inputs for current sequence if game
  *      has started
  */
-#include "GameData.hpp"
-// Pins and maximum level are defined in GameData.hpp file
+#include "GameData.h"
 
-// Game variables
+#ifdef IR_INPUT
+#include <IRremote.h>
+IRrecv ir(IR_PIN);
+#endif
+
 byte sequence[MAX_LEVEL] = {0};
 byte pressCount;
 byte games;
@@ -28,76 +31,101 @@ byte currentState = 0;
 byte previousState = 0;
 
 void setup() {
-  pinMode(INPUT_PIN, INPUT);
-  pinMode(RESET_PIN, INPUT);
   pinMode(LED_1, OUTPUT);
   pinMode(LED_2, OUTPUT);
   pinMode(LED_3, OUTPUT);
+  
+#if defined ANALOG_INPUT
+  pinMode(INPUT_PIN, INPUT);
+  pinMode(RESET_PIN, INPUT);
+#elif defined IR_INPUT
+  ir.enableIRIn();
+#endif
 }
 
 void loop() {
-  unsigned short analogVal = analogRead(INPUT_PIN);
-  byte resetVal = digitalRead(RESET_PIN);
-
-  // High when a button is pressed
-  if (analogVal > 0) currentState = 1; // > 5 for noise
+#if defined ANALOG_INPUT
+  unsigned short inputVal = analogRead(INPUT_PIN);
+  byte reset = digitalRead(RESET_PIN);
+#elif defined IR_INPUT
+  decode_results results;
+  unsigned long inputVal;
+  if (ir.decode(&results)) {
+    inputVal = results.value;
+    ir.resume();
+  }
+  else inputVal = 0;
+  delay(100);
+#endif
+  
+  // Creates a "clock" that only reads an input during a
+  // rising edge (when a button is pressed the first time)
+  if (inputVal > 0) currentState = 1;
   else currentState = 0;
-
-  // Checks for rising edge in input signal (low to high)
   boolean risingEdge = (currentState != previousState &&
     currentState == 1);
 
   switch (gameState) {
-    case 0:
-      // Sets/resets game values and waits for player to 
-      // start
+    case GAME_STOPPED:
+      // Waits for player to start
       level = 1;
       games = 0;
-      if (resetVal == HIGH) gameState = 1; // Start
+#if defined ANALOG_INPUT
+      if (reset == HIGH) gameState = GENERATE; 
+#elif defined IR_INPUT
+      if (inputVal == RESET) gameState = GENERATE;
+#endif
       break;
 
-    case 1:
-      // Sets/eesets sequence values and generates a new 
-      // sequence
+    case GENERATE:
+      // Generates a new sequence
       generateSequence();
       pressCount = 0;
       mistakeFound = false;
-      gameState = 2; // Play
+      gameState = INPUT_START; 
       break;
 
-    case 2:
+    case INPUT_START:
+      // Gets player input during a rising edge, or
+      // resets the player's inputs
       if (pressCount < level && risingEdge)
-        getInput(analogVal);
-        // Processes input when there's a rising edge
-      else if (pressCount < level && resetVal == HIGH) {
-        // Resets player's inputs
+        getInput(inputVal);
+
+#ifdef ANALOG_INPUT  
+// In the analog version, reset is not handled in getInput()
+      else if (pressCount < level && reset == HIGH) {
         mistakeFound = false;
         pressCount = 0;
       }
-      else if (!mistakeFound && pressCount == level) {
-        // Right sequence
-        playerCorrect();
-        gameState = 1; // Next sequence
-
-        if (games == level && level < MAX_LEVEL) {
-          // Level up if player is at levels 1 to
-          // MAX_LEVEL-1
-          playerLevelUp();
-        }
-        else if (games == level && level == MAX_LEVEL) {
-          // Player wins if all sequences in MAX_LEVEL
-          // have been played
-          playerWin();
-          gameState = 0; // End game
-        }
-        delay(1000); // 1s delay between sequences
-      }
-      else if (mistakeFound && pressCount == level) {
-        // Wrong sequence
-        playerWrong();
-        gameState = 0; // End game
-      }
+#endif
+      
       previousState = currentState;
+      if (pressCount == level) gameState = INPUT_DONE; 
+      break;
+      
+    case INPUT_DONE:
+      // If no mistake was found, moves on to the next
+      // sequence. Levels up/wins when certain conditions
+      // are met. If a mistake was found, stops the game
+      // right away.
+      if (!mistakeFound) { // Right sequence
+        playerCorrect();
+        gameState = GENERATE; 
+
+        if (games == level && level < MAX_LEVEL) 
+          playerLevelUp(); // Level up 
+        
+        else if (games == level && level == MAX_LEVEL) {
+          // Player wins after MAX_LEVEL
+          playerWin();
+          gameState = GAME_STOPPED;
+        }
+      }
+      else if (mistakeFound) { // Wrong sequence
+        playerWrong();
+        gameState = GAME_STOPPED;
+      }
+      delay(1000);
       break;
   }
 }
