@@ -3,6 +3,64 @@
  */
 #include "GameData.hpp"
 
+#if defined ANALOG_INPUT
+void getInput(unsigned short inputVal) {
+  // Processes player input and determines whether player
+  // is right or wrong
+  byte button = 0;
+  if (inputVal <= 1023 && inputVal >= 1020) {
+    button = LED_1;
+    blinkLed(LED_1, 120);
+  }
+  else if (inputVal <= 1005 && inputVal >= 990) {
+    button = LED_2;
+    blinkLed(LED_2, 120);
+  }
+  else if (inputVal <= 520 && inputVal >= 500) {
+    button = LED_3;
+    blinkLed(LED_3, 120);
+  }
+  else {
+    return;
+  }
+  if (sequence[pressCount] != button) mistakeFound = true;
+  pressCount++;
+}
+
+#elif defined IR_INPUT
+void getInput(unsigned long inputVal) {
+  // Processes player input and determines whether player
+  // is right or wrong
+  byte button = 0;
+  switch (inputVal) {
+    case LED_1_BUTTON:
+      button = LED_1;
+      blinkLed(LED_1, 120);
+      break;
+      
+    case LED_2_BUTTON:
+      button = LED_2;
+      blinkLed(LED_2, 120);
+      break;
+      
+    case LED_3_BUTTON:
+      button = LED_3;
+      blinkLed(LED_3, 120);
+      break;
+
+    case RESET:
+      mistakeFound = false;
+      pressCount = 0;
+      return;
+      
+    default:
+      return;
+  }
+  if (sequence[pressCount] != button) mistakeFound = true;
+  pressCount++;
+}
+#endif
+
 void blinkLed(byte led, unsigned short ms) {
   // LED blinks for ms amount of time
   digitalWrite(led, HIGH);
@@ -43,29 +101,6 @@ void blinkQuickSuccession(byte cycles) {
     blinkLed(LED_2, 50);
     blinkLed(LED_3, 50);
   }
-}
-
-void getInput(unsigned short analogVal) {
-  // Processes player input and determines whether player
-  // is right or wrong
-  byte button = 0;
-  if (analogVal <= 1023 && analogVal >= 1020) {
-    button = LED_1;
-    blinkLed(LED_1, 120);
-  }
-  else if (analogVal <= 1005 && analogVal >= 990) {
-    button = LED_2;
-    blinkLed(LED_2, 120);
-  }
-  else if (analogVal <= 520 && analogVal >= 500) {
-    button = LED_3;
-    blinkLed(LED_3, 120);
-  }
-  else {
-    return;
-  }
-  if (sequence[pressCount] != button) mistakeFound = true;
-  pressCount++;
 }
 
 void playerCorrect() {
