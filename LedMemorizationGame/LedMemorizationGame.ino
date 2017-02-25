@@ -14,10 +14,11 @@
  *    - Resets player's inputs for current sequence if game
  *      has started
  */
-#include "GameData.hpp"
+#include "GameData.h"
+
 #ifdef IR_INPUT
-  #include <IRremote.h>
-  IRrecv ir(IR_PIN);
+#include <IRremote.h>
+IRrecv ir(IR_PIN);
 #endif
 
 byte sequence[MAX_LEVEL] = {0};
@@ -34,28 +35,28 @@ void setup() {
   pinMode(LED_2, OUTPUT);
   pinMode(LED_3, OUTPUT);
   
-  #if defined ANALOG_INPUT
-    pinMode(INPUT_PIN, INPUT);
-    pinMode(RESET_PIN, INPUT);
-  #elif defined IR_INPUT
-    ir.enableIRIn();
-  #endif
+#if defined ANALOG_INPUT
+  pinMode(INPUT_PIN, INPUT);
+  pinMode(RESET_PIN, INPUT);
+#elif defined IR_INPUT
+  ir.enableIRIn();
+#endif
 }
 
 void loop() {
-  #if defined ANALOG_INPUT
-    unsigned short inputVal = analogRead(INPUT_PIN);
-    byte reset = digitalRead(RESET_PIN);
-  #elif defined IR_INPUT
-    decode_results results;
-    unsigned long inputVal;
-    if (ir.decode(&results)) {
-      inputVal = results.value;
-      ir.resume();
-    }
-    else inputVal = 0;
-    delay(100);
-  #endif
+#if defined ANALOG_INPUT
+  unsigned short inputVal = analogRead(INPUT_PIN);
+  byte reset = digitalRead(RESET_PIN);
+#elif defined IR_INPUT
+  decode_results results;
+  unsigned long inputVal;
+  if (ir.decode(&results)) {
+    inputVal = results.value;
+    ir.resume();
+  }
+  else inputVal = 0;
+  delay(100);
+#endif
   
   // Creates a "clock" that only reads an input during a
   // rising edge (when a button is pressed the first time)
@@ -69,11 +70,11 @@ void loop() {
       // Waits for player to start
       level = 1;
       games = 0;
-      #if defined ANALOG_INPUT
-        if (reset == HIGH) gameState = GENERATE; 
-      #elif defined IR_INPUT
-        if (inputVal == RESET) gameState = GENERATE;
-      #endif
+#if defined ANALOG_INPUT
+      if (reset == HIGH) gameState = GENERATE; 
+#elif defined IR_INPUT
+      if (inputVal == RESET) gameState = GENERATE;
+#endif
       break;
 
     case GENERATE:
@@ -90,13 +91,13 @@ void loop() {
       if (pressCount < level && risingEdge)
         getInput(inputVal);
 
-      #ifdef ANALOG_INPUT  // In the analog version, 
-        //reset is not handled in getInput()
-        else if (pressCount < level && reset == HIGH) {
-          mistakeFound = false;
-          pressCount = 0;
-        }
-      #endif
+#ifdef ANALOG_INPUT  
+// In the analog version, reset is not handled in getInput()
+      else if (pressCount < level && reset == HIGH) {
+        mistakeFound = false;
+        pressCount = 0;
+      }
+#endif
       
       previousState = currentState;
       if (pressCount == level) gameState = INPUT_DONE; 

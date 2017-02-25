@@ -1,7 +1,7 @@
 /*
  * Game functions
  */
-#include "GameData.hpp"
+#include "GameData.h"
 
 #if defined ANALOG_INPUT
 void getInput(unsigned short inputVal) {
