@@ -3,7 +3,7 @@
  */
 #include "GameData.h"
 
-#if defined ANALOG_INPUT
+#if defined VERSION && VERSION == ANALOG_INPUT
 void getInput(unsigned short inputVal) {
   // Processes player input and determines whether player
   // is right or wrong
@@ -27,7 +27,7 @@ void getInput(unsigned short inputVal) {
   pressCount++;
 }
 
-#elif defined IR_INPUT
+#elif defined VERSION && VERSION == IR_INPUT
 void getInput(unsigned long inputVal) {
   // Processes player input and determines whether player
   // is right or wrong

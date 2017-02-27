@@ -3,18 +3,23 @@
  */
 #ifndef LEDGAME
 #define LEDGAME
-#define IR_INPUT // ANALOG_INPUT or IR_INPUT depending on
-// which version of the game you want to play
+#define ANALOG_INPUT 5
+#define IR_INPUT 110
+#define VERSION ANALOG_INPUT
+// ANALOG_INPUT or IR_INPUT depending on version of the game
+// you want to play
 
 #include <Arduino.h>
 
 // Constants and prototypes exclusive to each version
-#if defined ANALOG_INPUT // analog input version
+#if defined VERSION && VERSION == ANALOG_INPUT 
+// analog input version
 #define INPUT_PIN A0
 #define RESET_PIN 2
 void getInput(unsigned short inputVal);
 
-#elif defined IR_INPUT // ir input version
+#elif defined VERSION && VERSION == IR_INPUT 
+// ir input version
 #define IR_PIN 2
 #define LED_1_BUTTON 0xFF30CF
 #define LED_2_BUTTON 0xFF18E7

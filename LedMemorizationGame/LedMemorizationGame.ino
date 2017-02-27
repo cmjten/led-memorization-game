@@ -6,17 +6,10 @@
  * equal to the current level in order to level up, and once
  * all the sequences in the maximum level have been played, 
  * the player wins.
- *
- * Controls:
- * - Three push buttons for the three LEDs
- * - One isolated push button for start/reset
- *    - Starts game if game hasn't started
- *    - Resets player's inputs for current sequence if game
- *      has started
  */
 #include "GameData.h"
 
-#ifdef IR_INPUT
+#if defined VERSION && VERSION == IR_INPUT
 #include <IRremote.h>
 IRrecv ir(IR_PIN);
 #endif
@@ -35,19 +28,21 @@ void setup() {
   pinMode(LED_2, OUTPUT);
   pinMode(LED_3, OUTPUT);
   
-#if defined ANALOG_INPUT
+#if defined VERSION && VERSION == ANALOG_INPUT
   pinMode(INPUT_PIN, INPUT);
   pinMode(RESET_PIN, INPUT);
-#elif defined IR_INPUT
+#elif defined VERSION && VERSION == IR_INPUT
   ir.enableIRIn();
 #endif
 }
 
 void loop() {
-#if defined ANALOG_INPUT
+// Method of getting the input
+#if defined VERSION && VERSION == ANALOG_INPUT
   unsigned short inputVal = analogRead(INPUT_PIN);
   byte reset = digitalRead(RESET_PIN);
-#elif defined IR_INPUT
+  
+#elif defined VERSION && VERSION == IR_INPUT
   decode_results results;
   unsigned long inputVal;
   if (ir.decode(&results)) {
@@ -70,9 +65,11 @@ void loop() {
       // Waits for player to start
       level = 1;
       games = 0;
-#if defined ANALOG_INPUT
+
+// Reset is handled differently in each version
+#if defined VERSION && VERSION == ANALOG_INPUT
       if (reset == HIGH) gameState = GENERATE; 
-#elif defined IR_INPUT
+#elif defined VERSION && VERSION == IR_INPUT
       if (inputVal == RESET) gameState = GENERATE;
 #endif
       break;
@@ -91,7 +88,7 @@ void loop() {
       if (pressCount < level && risingEdge)
         getInput(inputVal);
 
-#ifdef ANALOG_INPUT  
+#if defined VERSION && VERSION == ANALOG_INPUT
 // In the analog version, reset is not handled in getInput()
       else if (pressCount < level && reset == HIGH) {
         mistakeFound = false;
