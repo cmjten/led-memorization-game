@@ -31,9 +31,9 @@ This version of the game uses three voltage dividers connected to a single analo
 - Create the circuit, load the LedMemorizationGame.ino sketch onto your Arduino Uno, and play. Circuit diagram is in the Images section below.
 
 ### Images
-<img src="https://github.com/cmjten/led-memorization-game/blob/master/images_analog/led_memorization_analog_setup.png" width=600>
+<img src="./images_analog/led_memorization_analog_setup.png" width=600>
 
-<img src="https://github.com/cmjten/led-memorization-game/blob/master/images_analog/led_memorization_analog_breadboard.png" width=600>
+<img src="./images_analog/led_memorization_analog_breadboard.png" width=600>
 
 # IR Remote Input
 This version of the game uses an IR Receiver and an IR Remote as input. Each button is mapped to a hexadecimal number to differentiate the inputs.
@@ -58,6 +58,6 @@ This version of the game uses an IR Receiver and an IR Remote as input. Each but
 - Create the circuit, load the LedMemorizationGame.ino sketch onto your Arduino Uno, and play. Circuit diagram is in the Images section below.
 
 ### Images
-<img src="https://github.com/cmjten/led-memorization-game/blob/master/images_ir/led_memorization_game_ir_setup.png" width=600>
+<img src="./images_ir/led_memorization_game_ir_setup.png" width=600>
 
-<img src="https://github.com/cmjten/led-memorization-game/blob/master/images_ir/led_memorization_ir_breadboard.png" width=600>
+<img src="./images_ir/led_memorization_ir_breadboard.png" width=600>
